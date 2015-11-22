@@ -1,0 +1,29 @@
+{
+  "name": "logical-page-behaviors",
+  "homepage": "https://logicdudes.github.io/logical-page-behvaiors",
+  "authors": [
+    "Kevin Ashcraft <kevin@kevashcraft.com>"
+  ],
+  "description": "functions to handle dialogs and comment event handlers",
+  "main": "logical-page-behaviors.html",
+  "moduleType": [
+    "globals"
+  ],
+  "keywords": [
+    "web-components",
+    "polymer",
+    "dialog",
+    "events"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/Polymer#~1.2.3"
+  }
+}
