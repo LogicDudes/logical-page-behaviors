@@ -1,0 +1,241 @@
+<script>
+Polymer.LogicalListBehavior = {
+	properties: {
+		search: {
+			type: String,
+			observer: 'searchChanged'
+		},
+		searchFilters: {
+			type: Object,
+			value: {}
+		},
+
+		SortColumn: {
+			type: String,
+			observer: 'SortColumnChanged'
+		},
+
+		SortColumnReverse: {
+			type: Boolean,
+			value: false,
+			observer: 'SortColumnChanged'
+		},
+
+		listData: {
+			type: Array,
+			value: []
+		},
+
+		listDataAll: {
+			type: Array,
+			value: []
+		},
+	},
+
+	observers: [
+		'searchChanged(searchFilters.*)',
+		'searchChanged(listDataAll.*)'
+	],
+
+	ready: function() {
+		this.selectedItems = [];
+	},
+
+	// focus the search box
+	attached: function() {
+		document.onkeypress = function(){
+			// make sure input box is not focused
+			if(document.activeElement.tagName != 'INPUT' && document.activeElement.tagName != 'TEXTAREA')
+				this.$.search.$.input.focus();
+			
+		}.bind(this);
+	},
+	// set the search filters
+	searchFilter: function() {
+		var target = findTarget(event,'param','data');
+		var param = target.dataset.param;
+		var removed = false;
+
+		// add filter based on tag name
+		switch(target.tagName.toLowerCase()) {
+			case 'paper-checkbox':
+				var filter = target.dataset.filter;
+				// add filter if checked
+				if(target.checked) {
+					this.searchFilters[param] = filter;
+				} else { // else remove the filter
+					delete(this.searchFilters[param]);
+					removed = true;
+				}
+				break;
+			case 'select':
+				var filter = target.children[target.selectedIndex].dataset.filter;
+				// remove filter if none
+				if(filter == 'none' && typeof this.searchFilters[param] != 'undefined') {
+					delete(this.searchFilters[param]);
+					removed = true;
+				} else { // add filter
+					this.searchFilters[param] = filter;
+				}
+				break;
+			default:
+				console.log("No Filter Switch Was Found!");
+				break;
+		}
+		if(removed && this.automaticSearchFilters && this.automaticSearchFilters[param]) {
+			this.searchFilters[param] = this.automaticSearchFilters[param];
+		}
+		this.searchChanged();
+	},
+	searchChanged: function() {
+
+		if(!this.listDataAll) return;
+		var list = this.$$('iron-list');
+		var selectedItems = list.selectedItems;
+		if(selectedItems) {
+			for(var i = 0; i < selectedItems.length; i++) {
+				this.selectedItems.push(selectedItems[i]);
+			}
+			
+		}
+
+		var filters = this.searchFilters;
+
+		// Set needle
+		var needle = (this.search && this.search.length > 0) ? this.search.toLowerCase().split(" ") : [];
+
+			// Filter through the object
+			this.listData = this.listDataAll.filter(function(el){
+
+			// Set boolean and haystack
+			var found = 0;
+			var haystack = '';
+
+			// Populate haystack
+			for(var prop in el) {
+
+				if(typeof filters[prop] != 'undefined') {
+					var query = el[prop];
+					var cmd = filters[prop];
+					if(!eval(cmd))
+						return false;
+				}
+
+				// apply manual filters // array of objects
+				if(typeof filters.manual != 'undefined') {
+					var manualFilters = filters.manual;
+					// for each meanual filter
+					for(var i in manualFilters) {
+						// only apply if prop matches
+						if(manualFilters[i].prop == prop) {
+							// console.log("prop",prop);
+							// console.log("manualFilters",manualFilters);
+							var query = el[prop];
+							var cmd = manualFilters[i].cmd;
+							if(!eval(cmd))
+								return false;
+						}
+					}
+				}
+
+
+				if(typeof el[prop] == 'string') {
+					haystack += el[prop].toLowerCase() + ' ';
+				}
+					
+			}
+
+			if(needle.length > 0) {
+				needle.forEach(function(item){
+					if(haystack.indexOf(item) > -1) {
+						found++;
+					}
+				});
+
+				if(needle[needle.length -1] == '')
+					found++;
+
+				return found == needle.length;
+			} else {
+				return true;
+			}
+
+
+		});
+		if(list.multiSelection) {
+			var item;
+			var movingItems = [];
+			for(var i = 0; i < this.selectedItems.length; i++) {
+				item = this.selectedItems[i];
+				if(list._collection.getKey(item) !== undefined) {
+					list.selectItem(item);
+					this.selectedItems.splice(i, 1);
+					i--;
+				}
+
+			}
+		}
+		// list.selectedItems = selectedItems;
+	},
+
+	SortColumnChanged: function(SortColumn) {
+	
+		if(this.SortColumn) {
+
+			var SortColumn = this.SortColumn;
+
+			this.listDataAll.sort(function(a, b){
+				// get the column values for a and b
+				var a = a[SortColumn]; 
+				var b = b[SortColumn]; 
+				// exit if either are null
+				if(!a || !b) return a ? 1 : -1;
+				// sort
+				if(this.SortColumnReverse) {
+					return a.toLowerCase() > b.toLowerCase() ? -1 : 1;
+				} else {
+					return a.toLowerCase() < b.toLowerCase() ? -1 : 1;
+				}
+			});
+
+			this.searchChanged();		
+		}
+	},
+	
+	sort: function() {
+		var column = this.$.columns.itemForElement(event.target);
+		this.sortColumn = column;
+
+		var sortBy = column.replace(/ /g, '');
+		if(sortBy == this.sortBy)
+			var sortReverse = this.sortReverse = !this.sortReverse;
+		else
+			var sortReverse = this.sortReverse = false;
+
+		this.listDataAll.sort(function(a, b){
+			// get the column values for a and b
+			var a = a[sortBy]; 
+			var b = b[sortBy]; 
+			// exit if either are null
+			if(!a || !b) return a ? 1 : -1;
+			// sort
+			if(sortReverse) {
+				return a.toLowerCase() > b.toLowerCase() ? -1 : 1;
+			} else {
+				return a.toLowerCase() < b.toLowerCase() ? -1 : 1;
+			}
+		});
+		this.sortBy = sortBy;
+		this.searchChanged();
+	},
+	sortClass: function(property) {
+		return property == this.sortBy ? 'sort' : '';
+	},
+	sortHidden: function(property) {
+		return this.sortBy != property;
+	},
+	sortIcon: function() {
+		return this.sortReverse ? 'expand-less' : 'expand-more';
+	},
+};
+</script>
