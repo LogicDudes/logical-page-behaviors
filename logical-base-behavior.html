@@ -107,16 +107,6 @@ Polymer.LogicalBaseBehavior = {
 		console.log("g",g); 
 		return arguments[0] ? arguments[1] : arguments[2];
 	},
-	jaxson: function(url, params, addlParams) {
-		if(addlParams) {
-			var params = copy(params);
-			for(var k in addlParams) {
-				params[k] = addlParams[k];
-			}
-		}
-		BPC.jaxson(url, params, this);
-	},
-
 	// returns the length of something
 	lengthof: function() {
 		return arguments[0].length;

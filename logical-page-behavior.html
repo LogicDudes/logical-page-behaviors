@@ -95,6 +95,16 @@ Polymer.LogicalPageBehaviorImpl = {
 		// open new dialog
 		LogicalApp.CurrentDialog.open();
 	},
+	jaxson: function(url, params, addlParams) {
+		if(addlParams) {
+			var params = copy(params);
+			for(var k in addlParams) {
+				params[k] = addlParams[k];
+			}
+		}
+		BPC.jaxson(url, params, this);
+	},
+
 
 	_sync: function(paths) {
 	
