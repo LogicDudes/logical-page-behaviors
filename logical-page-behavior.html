@@ -1,0 +1,153 @@
+<link rel="import" href="../neon-animation/neon-animation-runner-behavior.html">
+<script>
+Polymer.LogicalPageBehaviorImpl = {
+	properties: {
+		animationConfig: {
+			value: function() {
+				return {
+					'show': {
+						name: 'fade-in-animation',
+						node: this,
+						timing: {
+							duration: 350
+						}
+					},
+					'hide': {
+						name: 'slide-right-animation',
+						node: this,
+						timing: {
+							duration: 500
+						}
+					},
+				}
+			}
+		},
+
+	},
+	listeners: {
+		'neon-animation-finish': 'animationComplete'
+	},
+	animationComplete: function() {
+		if(this.opened)
+			this.style.opacity = 1;
+		else
+			this.remove();
+	},
+	animateIn: function() {
+		this.opened = true;
+		this.playAnimation('show');
+	},
+	animateOut: function() {
+		this.opened = false;
+		this.playAnimation('hide');
+	},
+	// pass jaxson request to main jaxson function
+	jaxson: function(url, params) {
+		LogicalApp.jaxson(url, params, this);
+	},
+
+	SyncPath: function(path) {
+		
+		this.notifyPath(path, EL[path]);
+	},
+
+	// short name redirect for dialogEvent
+	dialog: function() {
+	
+		this.dialogEvent();
+	},
+	
+
+	// closes the dialog
+	dialogClose: function() {
+
+		if(LogicalApp.CurrentDialog)
+			LogicalApp.CurrentDialog.close();
+	},
+
+	// load dialog from event
+	dialogEvent: function() {
+
+		var dialogID = this._data('dialog');
+		this.dialogOpen(dialogID);
+	},
+
+	// refits the opened dialog
+	dialogFit: function() {
+
+		if(LogicalApp.CurrentDialog) {
+			LogicalApp.CurrentDialog.fit();
+		}
+	},
+
+	// open dialog by id
+	dialogOpen: function(dialogID) {
+
+		this.dialogClose();
+
+		// if current page hase a dialog switch, then pass id through it
+		if(this.dialogSwitch)
+			dialogID = this.dialogSwitch(dialogID);
+
+		// link new dialog
+		LogicalApp.CurrentDialog = this.$[dialogID];
+
+		// open new dialog
+		LogicalApp.CurrentDialog.open();
+	},
+	_enableChild: function() {
+	
+		var parent = this._data('parent', true);
+		parent.children[0].disabled = false;
+	},
+	
+
+	jaxson: function(url, params, addlParams) {
+		if(addlParams) {
+			var params = copy(params);
+			for(var k in addlParams) {
+				params[k] = addlParams[k];
+			}
+		}
+		BPC.jaxson(url, params, this);
+	},
+
+
+	_sync: function(paths) {
+	
+		for (var i = 0; i < paths.length; i++) {
+			var path = paths[i];
+			var dashed = path;
+			for (var j = 1; j < dashed.length; j++) {
+				if(dashed[j].match(/[A-Z]/) != null) {
+					dashed = dashed.substring(0, j) + '-' + dashed[j].toLowerCase() + dashed.substring(j + 1);
+					j++;
+				}
+			};
+			this[path] = LogicalApp[path];
+
+			LogicalApp.addEventListener(dashed + '-changed', this._syncEvent.bind(this));
+		};
+	},
+
+	_syncEvent: function(info) {
+	
+		var path = event.type.split('-');
+		path.pop();
+		this[path] = {};
+		this[path] = LogicalApp[path];
+	},
+	
+
+	_enterFunction: function() {
+		
+		if(event.keyCode == 13) {
+			var f = this._data('function');
+			this[f]();
+		}
+	},
+			
+
+};
+Polymer.LogicalPageBehavior = [ Polymer.LogicalPageBehaviorImpl, Polymer.NeonAnimationRunnerBehavior ];
+</script>

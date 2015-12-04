@@ -1,0 +1,249 @@
+<script>
+Polymer.LogicalBaseBehavior = {
+	_any: function() {
+		for(var i in arguments) {
+			if(arguments[i]) return true;
+		}
+		return false;
+	},
+	_data: function(attr, returnElement) {
+		var target = event.target;
+		attr = attr.toLowerCase();
+		while(target) {
+			if(target.dataset && target.dataset[attr]) {
+				return returnElement ? target : target.dataset[attr];
+			}
+			target = target.parentElement;
+		}
+		return false;
+	},
+	_dec: function() {
+		var path = this._data('path');
+		var dec = this[path] ? parseInt(this[path]) - 1 : -1;
+		this.set(path, dec);
+	},
+	_empty: function() {
+		return arguments[0].length == 0;
+	},
+
+	_focusID: function(id) {
+	
+		if(typeof id != 'string')
+			var id = this._data('id');
+
+		this._focus(this.$[id]);
+	},
+	
+
+	_has: function() {
+		
+		var a = (typeof arguments[0] == 'string') ? arguments[0].split(',') : arguments[1];
+
+		return a.indexOf(arguments[1]) > -1;
+	},
+	
+	_inc: function() {
+		var path = this._data('path');
+		var inc = this[path] ? parseInt(this[path]) + 1 : 1;
+		this.set(path, inc);
+	},
+
+	// true if in array
+	_isa: function() {
+		var path = arguments[1];
+		var needle = arguments[2];
+		return arguments[0][path] && arguments[0][path].indexOf(needle) > -1;			
+	},
+	
+	
+	// returns true if arg1 does not equal arg2
+	_is: function() {
+
+		if(arguments.length == 2) {
+			return arguments[0] == arguments[1];
+		} else if(arguments.length == 3) {
+			return arguments[0] == arguments[1] || arguments[0] == arguments[2];
+		}
+	},
+
+	// true if path (arg1) of arg0 equals arg2
+	_isp: function() {
+		var path = arguments[1];
+		return arguments[0][path] && arguments[0][path] == arguments[2];	
+	},
+	
+	
+
+	_isOr: function() {
+		return arguments[0] == arguments[1] || arguments[0] == arguments[2];
+	},
+	// returns true if it is more than
+	_ismore: function() {
+		return arguments[0] > arguments[1];
+	},
+	// returns true if arg1 does not equal arg2
+	_isnot: function() {
+		return arguments[0] != arguments[1];
+	},
+	// returns all the arguments as a string separated by a space
+	_concat: function() {
+		var args = [];
+		for(a in arguments) {
+			args.push(arguments[a]);
+		}
+		return args.join('');
+	},
+	// returns true if arg0 == arg1
+	equals: function() {
+		return arguments[0] == arguments[1];
+	},
+	// if true returns arg1 else arg2
+	ifthen: function() {
+		console.log("IF THEN CALLED!!");
+		this._if(arguments);
+	},
+	_if: function() {
+		var g = arguments[0] ? arguments[1] : arguments[2];
+		console.log("g",g); 
+		return arguments[0] ? arguments[1] : arguments[2];
+	},
+	// returns the length of something
+	lengthof: function() {
+		return arguments[0].length;
+	},
+	_focus: function( element ) {
+		console.log("focusing",element.tagName.toLowerCase());
+		switch(element.tagName.toLowerCase()) {
+			case 'paper-input':
+			case 'paper-textarea':
+				element.$.input.focus();
+			break;
+			case 'paper-dropdown-menu':
+				element.open();
+			break;
+			default:
+				element.focus();
+			break;
+		}
+	},
+	_preventDefault: function() {
+		event.preventDefault();
+	},
+	_null: function() {
+		
+	},
+	// asserts only one property can be true
+	onlyOne: function(a, b, c) {
+		console.log("event",event);
+		console.log("c",c);
+		if(a && b) {
+			a = false;
+			b = false;
+		}
+	},
+	_url: function(suburl) {
+		return window.location.origin + '/' + suburl.join('/');
+	},
+	_set: function() {
+		var target = this._data('path', 1);
+		var path = target.dataset.path;
+		var val = target.dataset.val;
+		this[path] = val == 'true' ? true : val == 'false' ? false : val;
+	},
+	_stoppropagation: function() {
+	
+		event.stopPropagation();
+	},
+	
+	_sqlbool: function(bool) {
+		return bool == 1;
+	},
+	_tag: function(query) {
+		var query = query.toLowerCase();
+		var target = event.target;
+		while(target) {
+			if (target.tagName.toLowerCase() == query) {
+				return target;
+			}
+			target = target.parentElement;
+		}
+	},
+	// returns the target containing the query
+	_target: function(query, type) {
+		var target = event.target;
+		var type = type || 'data';
+		switch(type) {
+			case 'data':
+				query = query.toLowerCase();
+				while(target) {
+					// return when found
+					if (target.dataset && target.dataset[query])
+						return target;
+
+					// try the parent
+					target = target.parentElement;
+				}
+			break;
+			case 'tag':
+				// standardize tag
+				var tag = query.toUpperCase();
+				// look through targets
+				while(target) {
+					// return when found
+					if(target.tagName == tag)
+						return target;
+					// try parent
+					target = target.parentElement;
+				}
+			break;
+		}
+		return false;
+	},
+	_today: function( deltaDays, weekday ) {
+
+		var mDate = new Date();
+
+		var deltaDays = deltaDays || 0;
+
+		if(weekday) {
+			var deltaDayOfWeek = (mDate.getDay() + deltaDays) % 7;
+			if( deltaDayOfWeek == 0 ) {
+				if(deltaDays < 0) deltaDays -=  2;
+				if(deltaDays > 0) deltaDays++;
+			} else if ( deltaDayOfWeek == 6 ) {
+				if(deltaDays < 0) deltaDays--;
+				if(deltaDays > 0) deltaDays += 2;
+			}
+		}
+
+		mDate.setDate(mDate.getDate() + deltaDays);
+
+		var dd = mDate.getDate();
+		var mm = mDate.getMonth() + 1;
+		var yyyy = mDate.getFullYear();
+
+		if(mm < 10) mm = '0' + mm;
+		if(dd < 10) dd = '0' + dd;
+
+		return yyyy + '-' + mm + '-' + dd;
+
+	},
+	_toggle: function(path) {
+
+		var path = typeof path == 'string' ? path : this._data('path');
+		var pathArray = path.split('.');
+		var obj = this;
+		for (var i = 0; i < pathArray.length; i++) {
+			var level = pathArray[i];
+			obj = obj[level]
+		};
+		if(!obj || obj == 0) {
+			var bool = true;
+		} else {
+			var bool = false;
+		}
+		this.set(path, bool);
+	},
+	
+};
+</script>
