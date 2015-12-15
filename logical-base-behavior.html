@@ -6,6 +6,12 @@ Polymer.LogicalBaseBehavior = {
 		}
 		return false;
 	},
+	_all: function() {
+		for(var i in arguments) {
+			if(!arguments[i]) return false;
+		}
+		return true;
+	},
 	_data: function(attr, returnElement) {
 		var target = event.target;
 		attr = attr.toLowerCase();
@@ -115,6 +121,14 @@ Polymer.LogicalBaseBehavior = {
 		console.log("focusing",element.tagName.toLowerCase());
 		switch(element.tagName.toLowerCase()) {
 			case 'paper-input':
+				// open a calendar
+				if(element.type == 'date') {
+					this.async(function(){
+						var ev = document.createEvent('KeyboardEvent');
+						ev.initKeyboardEvent('keydown', true, true, document.defaultView, 'F4', 0);
+						element.$.input.dispatchEvent(ev);
+					},250);
+				}
 			case 'paper-textarea':
 				element.$.input.focus();
 			break;
@@ -147,8 +161,9 @@ Polymer.LogicalBaseBehavior = {
 	_set: function() {
 		var target = this._data('path', 1);
 		var path = target.dataset.path;
-		var val = target.dataset.val;
-		this[path] = val == 'true' ? true : val == 'false' ? false : val;
+		var val = target.dataset.val == 'true' ? true : target.dataset.val == 'false' ? false : target.dataset.val;
+
+		this.set(path, val);
 	},
 	_stoppropagation: function() {
 	
