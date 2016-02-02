@@ -89,6 +89,12 @@ Polymer.LogicalPageBehaviorImpl = {
 		if(this.dialogSwitch)
 			dialogID = this.dialogSwitch(dialogID);
 
+		// exit if the dialogs been set to false
+		if(!dialogID) return;
+
+		if(this.DialogSwitch)
+			dialogID = this.DialogSwitch(dialogID);
+
 		// link new dialog
 		LogicalApp.CurrentDialog = this.$[dialogID];
 
@@ -109,33 +115,17 @@ Polymer.LogicalPageBehaviorImpl = {
 				params[k] = addlParams[k];
 			}
 		}
-		BPC.jaxson(url, params, this);
+		LogicalApp.jaxson(url, params, this);
 	},
 
 
-	_sync: function(paths) {
+	_select: function() {
 	
-		for (var i = 0; i < paths.length; i++) {
-			var path = paths[i];
-			var dashed = path;
-			for (var j = 1; j < dashed.length; j++) {
-				if(dashed[j].match(/[A-Z]/) != null) {
-					dashed = dashed.substring(0, j) + '-' + dashed[j].toLowerCase() + dashed.substring(j + 1);
-					j++;
-				}
-			};
-			this[path] = LogicalApp[path];
+		var selectorID = this._data('selector');
+		var selector = this.$[selector];
 
-			LogicalApp.addEventListener(dashed + '-changed', this._syncEvent.bind(this));
-		};
-	},
-
-	_syncEvent: function(info) {
-	
-		var path = event.type.split('-');
-		path.pop();
-		this[path] = {};
-		this[path] = LogicalApp[path];
+		var item = selector.itemForElement(event.target);
+		selector.selector(item);
 	},
 	
 
