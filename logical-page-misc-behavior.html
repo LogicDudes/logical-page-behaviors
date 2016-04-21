@@ -1,0 +1,21 @@
+<!-- 
+Logical Page Misc Behavior
+	Description: Miscellaneous page functions for a LogicalApp
+	Created by: Kevin Ashcraft
+	Created on: 2015-12-15
+	Last Modified: 2016-04-20
+	Repo: https://github.com/LogicDudes/logical-page-behaviors
+	 -->
+<script>
+Polymer.LogicalPageMiscBehavior = {
+
+	// pass jaxson request to LogicalApp's jaxson function
+	jaxson: function(url, params) {
+
+		LogicalApp.jaxson(url, params, this);
+	},
+
+
+
+};
+</script>

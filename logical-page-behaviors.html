@@ -1,5 +1,20 @@
-<link rel="import" href="logical-base-behavior.html">
-<link rel="import" href="logical-page-behavior.html">
+<!-- 
+Logical Page Behaviors
+	Description: Behaviors for LogicalApp pages
+	Created by: Kevin Ashcraft
+	Created on: 2015-12-15
+	Last Modified: 2016-04-20
+	Repo: https://github.com/LogicDudes/logical-page-behaviors
+	 -->
+<link rel="import" href="logical-page-animation-behavior.html">
+<link rel="import" href="logical-page-base-behavior.html">
+<link rel="import" href="logical-page-dialog-behavior.html">
+<link rel="import" href="logical-page-misc-behavior.html">
 <script>
-Polymer.LogicalPageBehaviors = [ Polymer.LogicalBaseBehavior, Polymer.LogicalPageBehavior ];
+Polymer.LogicalPageBehaviors = [
+	Polymer.LogicalPageAnimationBehavior,
+	Polymer.LogicalPageBaseBehavior,
+	Polymer.LogicalPageDialogBehavior,
+	Polymer.LogicalPageMiscBehavior,
+];
 </script>

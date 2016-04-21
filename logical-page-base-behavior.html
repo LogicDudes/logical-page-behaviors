@@ -1,0 +1,366 @@
+<!-- 
+Logical Base Behavior
+	Description: Simple functions to assist page actions
+	Created by: Kevin Ashcraft
+	Created on: 2015-12-15
+	Last Modified: 2016-04-20
+	Repo: https://github.com/LogicDudes/logical-page-behaviors
+	 -->
+<script>
+Polymer.LogicalPageBaseBehavior = {
+
+	// Comparisons
+
+	// true if all arguments are true
+	_all: function() {
+		console.log("arguments", arguments);
+		for(var i in arguments) {
+			if(!arguments[i]) return false;
+		}
+		return true;
+	},
+
+
+	// true if any arguments are true
+	_any: function() {
+
+		for(var i in arguments) {
+			if(arguments[i]) return true;
+		}
+		return false;
+	},
+
+
+	// true if the argument is empty
+	_empty: function() {
+
+		return !arguments[0] || arguments[0].length == 0;
+	},
+
+
+	// true if first argument contains the second
+	_has: function() {
+		
+		var a = (typeof arguments[0] == 'string') ? arguments[0].split(',') : arguments[1];
+
+		return a.indexOf(arguments[1]) > -1;
+	},
+	
+
+	// compares first argument to the second, returns the third if true, else the fourth
+	_if: function() {
+		return arguments[0] == arguments[1] ? arguments[2] : arguments[3];
+	},
+
+
+	// true if any arg(n) = arg(n+1)
+	_isa: function() {
+
+		if(arguments.length % 2 != 0) {
+			console.log("ERROR! odd number of arguments!");
+			return false;
+		}
+
+		for (var i = 0; i < arguments.length; i+=2) {
+			if(arguments[i] == arguments[i + 1])
+				return true;
+		};
+
+		return false;
+	},
+	
+	
+	// true if ALL odd arguments equel their even counterpart
+	_isA: function() {
+
+		if(arguments.length % 2 != 0) {
+			console.log("ERROR! odd number of arguments!");
+			return false;
+		}
+
+		for (var i = 0; i < arguments.length; i+=2) {
+			if(arguments[i] != arguments[i + 1])
+				return false;
+		};
+
+		return true;
+	},
+	
+	
+	// true if any arguements equeal the first argument
+	_is: function() {
+
+		for (var i = 1; i < arguments.length; i++) {
+			if(arguments[0] == arguments[i])
+				return true;
+		};
+
+		return false;
+	},
+
+
+	// true if first arguemnt is greater than the second
+	_isgt: function() {
+
+		return Number(arguments[0]) > Number(arguments[1]);
+	},
+
+
+	// true if first arguemnt is less than the second
+	_islt: function() {
+
+		return Number(arguments[0]) < Number(arguments[1]);
+	},
+	
+
+	// true if first arguemnt is between the first and the second
+	_isb: function() {
+	
+		return Number(arguments[0]) <= Number(arguments[2]) && Number(arguments[0]) >= Number(arguments[1]);
+	},
+
+
+	// true if first argument, a path, equals the second argument
+	_isp: function() {
+
+		var path = arguments[1];
+		return arguments[0][path] && arguments[0][path] == arguments[2];	
+	},
+	
+	
+	// true if first argument, a path, equals the second argument
+	_isOr: function() {
+		return arguments[0] == arguments[1] || arguments[0] == arguments[2];
+	},
+
+
+
+	// Operators
+		// Perform changes on given path
+
+
+	// decreases the value of the variable found in data-path
+	_dec: function(event) {
+		var path = this._data('path', event);
+		var dec = this[path] ? parseInt(this[path]) - 1 : -1;
+		this.set(path, dec);
+	},
+
+
+	// increases the value of the variable found in data-path
+	_inc: function(event) {
+		var path = this._data('path', event);
+		var inc = this[path] ? parseInt(this[path]) + 1 : 1;
+		this.set(path, inc);
+	},
+
+
+	// sets data-path to data-val
+	_set: function(event) {
+		var target = this._data('path', event, true);
+		var path = target.dataset.path;
+		var val = target.dataset.val == 'true' ? true : target.dataset.val == 'false' ? false : target.dataset.val;
+		this.set(path, val);
+
+		if(target.dataset.secondpath) {
+			this.set(target.dataset.secondpath, val);
+		}
+
+		if(this._data('closeme', event))
+			this.dialogClose();
+	},
+
+
+	// toggles the path value to true or false
+	_toggle: function(path) {
+
+		var path = typeof path == 'string' ? path : this._data('path');
+		var pathArray = path.split('.');
+		var obj = this;
+		for (var i = 0; i < pathArray.length; i++) {
+			var level = pathArray[i];
+			obj = obj[level]
+		};
+
+		if(!obj || obj == 0) {
+			var bool = 1;
+		} else {
+			var bool = 0;
+		}
+
+		this.set(path, bool);
+	},	
+
+
+
+	// Finders
+
+
+	// finds element with given data-attribute in event targets,
+	// returns either the value of the attribute or the element
+	_data: function(attr, event, returnElement) {
+		var target = event.target;
+		attr = attr.toLowerCase();
+		while(target) {
+			if(target.dataset && target.dataset[attr]) {
+				return returnElement ? target : target.dataset[attr];
+			}
+			target = target.parentElement;
+		}
+		return false;
+	},
+
+
+	// finds element with given tag and returns it	
+	_tag: function(query, event) {
+		var query = query.toLowerCase();
+		var target = event.target;
+		while(target) {
+			if (target.tagName.toLowerCase() == query) {
+				return target;
+			}
+			target = target.parentElement;
+		}
+	},
+
+
+	// Formatters
+		// returns a formatted version of the argument
+
+
+	// concats all the arguments, separated by a space
+	_concat: function() {
+		var args = [];
+		for(a in arguments) {
+			args.push(arguments[a]);
+		}
+		return args.join('');
+	},
+
+
+	// returns the second argument subtracted by the first
+	_ms: function() {
+
+		var v = Number(arguments[0]);	
+		for (var i = 1; i < arguments.length; i++) {
+			v = v - Number(arguments[i]);
+		};
+		return v;
+	},
+
+
+	// formats a phone number
+	_phoneNumber: function(number) {
+	
+		if(!number) return;
+		return '(' + number.substring(0,2) + ') ' + number.substring(3,5) + '-' + number.substring(5);
+	},
+
+
+	// adds the domain and protocol to a url
+	_url: function(suburl) {
+		return window.location.origin + '/' + suburl.join('/');
+	},
+
+
+
+	// Actions
+		// does something to something
+
+
+	// focuses an element	
+	_focus: function( element ) {
+
+		var input,
+				highlight,
+				isMenu,
+				isDate;
+
+		switch(element.tagName.toLowerCase()) {
+			case 'paper-input':
+			case 'gold-phone-input':
+				input = element.$.input;
+				if(element.type == 'date') isDate = true;
+			break;
+			case 'paper-textarea':
+				input = element.$.input.$.textarea;
+			break;
+			case 'paper-dropdown-menu':
+				input = element;
+				isMenu = true;
+			break;
+			default:
+				input = element;
+		}
+
+		if(isMenu) {
+			input.open();
+		} else if(isDate) {
+			this.async(function(){
+				var ev = document.createEvent('KeyboardEvent');
+				ev.initKeyboardEvent('keydown', true, true, document.defaultView, 'F4', 0);
+				input.dispatchEvent(ev);
+			},250);
+		} else {
+			input.focus();
+		}
+
+		if(element.getAttribute('auto-highlight') != undefined) {
+			input.select();
+		}
+
+	},
+
+
+	// prevents the default action
+	_preventDefault: function(event) {
+		event.preventDefault();
+	},
+
+
+	// stops the event's propagation
+	_stopPropagation: function(event) {
+	
+		event.stopPropagation();
+	},
+
+
+
+	// Miscellaneous
+
+
+	// returns todays date
+	_today: function( deltaDays, weekday ) {
+
+		var mDate = new Date();
+
+		var deltaDays = deltaDays || 0;
+
+		if(weekday) {
+			var deltaDayOfWeek = (mDate.getDay() + deltaDays) % 7;
+			if( deltaDayOfWeek == 0 ) {
+				if(deltaDays < 0) deltaDays -=  2;
+				if(deltaDays > 0) deltaDays++;
+			} else if ( deltaDayOfWeek == 6 ) {
+				if(deltaDays < 0) deltaDays--;
+				if(deltaDays > 0) deltaDays += 2;
+			}
+		}
+
+		mDate.setDate(mDate.getDate() + deltaDays);
+
+		var dd = mDate.getDate();
+		var mm = mDate.getMonth() + 1;
+		var yyyy = mDate.getFullYear();
+
+		if(mm < 10) mm = '0' + mm;
+		if(dd < 10) dd = '0' + dd;
+
+		return yyyy + '-' + mm + '-' + dd;
+
+	},
+
+
+
+};
+</script>

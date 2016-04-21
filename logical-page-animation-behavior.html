@@ -1,0 +1,74 @@
+<!-- 
+Logical Page Animation Behavior
+	Description: Handles page animations for a LogicalApp
+	Created by: Kevin Ashcraft
+	Created on: 2015-12-15
+	Last Modified: 2016-04-20
+	Repo: https://github.com/LogicDudes/logical-page-behaviors
+	 -->
+<link rel="import" href="../neon-animation/neon-animation-runner-behavior.html">
+<script>
+Polymer.LogicalPageAnimationBehaviorImpl = {
+
+	properties: {
+
+		// Animation config
+		animationConfig: {
+			value: function() {
+				return {
+					'show': {
+						name: 'fade-in-animation',
+						node: this,
+						timing: {
+							duration: 350
+						}
+					},
+					'hide': {
+						name: 'slide-right-animation',
+						node: this,
+						timing: {
+							duration: 500
+						}
+					},
+				}
+			}
+		},
+
+	},
+
+	// Listens for the end of the animation
+	listeners: {
+
+		'neon-animation-finish': 'animationComplete'
+	},
+
+
+	// Sets style/attribute once animation is complete
+	animationComplete: function() {
+
+		if(this.opened) {
+			this.style.opacity = 1;
+		}	else {
+			this.remove();
+		}
+	},
+
+	// Begins the incoming animation process
+	animateIn: function() {
+
+		this.opened = true;
+		this.playAnimation('show');
+	},
+
+	// Begins the outgoing animation process
+	animateOut: function() {
+
+		this.opened = false;
+		this.playAnimation('hide');
+	},
+	
+
+
+};
+Polymer.LogicalPageAnimationBehavior = [ Polymer.NeonAnimationRunnerBehavior, Polymer.LogicalPageAnimationBehaviorImpl];
+</script>
