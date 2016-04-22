@@ -28,6 +28,10 @@ Polymer.LogicalPageDialogBehavior = {
 	dialogEvent: function(event) {
 
 		var dialogID = this._data('dialog', event);
+		var val = this._data('val', event);
+		if(val) {
+			this.set(dialogID + 'Dialog', val);
+		}
 		this.dialogOpen(dialogID);
 	},
 
