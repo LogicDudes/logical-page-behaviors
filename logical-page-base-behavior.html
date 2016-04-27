@@ -289,6 +289,9 @@ Polymer.LogicalPageBaseBehavior = {
 				input = element;
 				isMenu = true;
 			break;
+			case 'logical-autocomplete':
+				input = element.$.input.$.input;
+			break;
 			default:
 				input = element;
 		}
@@ -360,6 +363,24 @@ Polymer.LogicalPageBaseBehavior = {
 
 	},
 
+
+	_validate: function(inputs) {
+	
+		var inputs = inputs || LogicalApp.CurrentDialog.querySelectorAll('[required]');
+		if(!inputs) return false;
+			var valid = true;
+		for(var i in inputs) {
+			if(inputs.hasOwnProperty(i)) {
+				inputs[i].validate();
+				if(inputs[i].invalid) {
+					valid = false;
+				}
+			}
+		}
+
+		return valid;
+	},
+	
 
 
 };
