@@ -9,6 +9,18 @@ Logical Base Behavior
 <script>
 Polymer.LogicalPageBaseBehavior = {
 
+	ready: function() {
+	
+		this._screenSizeSet();
+		window.onresize = this._screenSizeSet.bind(this);
+	},
+
+	_screenSizeSet: function() {
+		this.set('_smallScreen', window.innerWidth < 800);
+	},
+	
+	
+
 	// Comparisons
 
 	// true if all arguments are true
@@ -132,7 +144,7 @@ Polymer.LogicalPageBaseBehavior = {
 	_isOr: function() {
 		return arguments[0] == arguments[1] || arguments[0] == arguments[2];
 	},
-
+	
 
 
 	// Operators
@@ -172,9 +184,9 @@ Polymer.LogicalPageBaseBehavior = {
 
 
 	// toggles the path value to true or false
-	_toggle: function(path) {
+	_toggle: function(event) {
 
-		var path = typeof path == 'string' ? path : this._data('path');
+		var path = this._data('path', event);
 		var pathArray = path.split('.');
 		var obj = this;
 		for (var i = 0; i < pathArray.length; i++) {
@@ -267,6 +279,11 @@ Polymer.LogicalPageBaseBehavior = {
 	// Actions
 		// does something to something
 
+	// copies an object
+	_copy: function(obj) {
+		return JSON.parse(JSON.stringify(obj));
+	},
+	
 
 	// focuses an element	
 	_focus: function( element ) {
@@ -313,6 +330,46 @@ Polymer.LogicalPageBaseBehavior = {
 		}
 
 	},
+
+	_enterDetect: function(event) {
+	
+		if(event.keyCode == 13) {
+			var enterFunction = this._data('enter', event);
+			this[enterFunction]();
+		}
+	},
+	
+
+	_inputsCheck: function(inputContainer) {
+	
+		var inputs = inputContainer.querySelectorAll('[required]');
+		if(inputs) {
+			var valid = true;
+			for(var i in inputs) {
+				if(inputs.hasOwnProperty(i)) {
+					inputs[i].validate();
+					if(inputs[i].invalid) valid = false;
+				}
+			}
+
+			return valid;
+		}
+	},
+	
+
+	_inputsReset: function(inputContainer) {
+	
+		var inputs = inputContainer.querySelectorAll('[required]');
+		if(inputs) {
+			for(var i in inputs) {
+				if(inputs.hasOwnProperty(i)) {
+					inputs[i].invalid = false;
+				}
+			}
+		}
+	},
+	
+
 
 
 	// prevents the default action

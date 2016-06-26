@@ -32,7 +32,7 @@ Polymer.LogicalPageDialogBehavior = {
 		if(val) {
 			this.set(dialogID + 'Dialog', val);
 		}
-		this.dialogOpen(dialogID);
+		this.dialogOpen(dialogID, event);
 	},
 
 
@@ -46,13 +46,13 @@ Polymer.LogicalPageDialogBehavior = {
 
 
 	// open dialog by id
-	dialogOpen: function(dialogID) {
+	dialogOpen: function(dialogID, event) {
 
 		this.dialogClose();
 
 		// if current page hase a dialog switch, then pass id through it
 		if(this.dialogSwitch)
-			dialogID = this.dialogSwitch(dialogID);
+			dialogID = this.dialogSwitch(dialogID, event);
 
 		// exit if the dialogs been set to false
 		if(!dialogID) return;
