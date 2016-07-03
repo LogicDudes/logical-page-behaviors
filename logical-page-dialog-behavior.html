@@ -48,6 +48,11 @@ Polymer.LogicalPageDialogBehavior = {
 	// open dialog by id
 	dialogOpen: function(dialogID, event) {
 
+		// close drawer
+		if(LogicalApp.$.DrawerPanel.narrow) {
+			LogicalApp.$.DrawerPanel.closeDrawer();
+		}
+
 		this.dialogClose();
 
 		// if current page hase a dialog switch, then pass id through it
